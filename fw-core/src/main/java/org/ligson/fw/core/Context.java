@@ -1,9 +1,13 @@
 package org.ligson.fw.core;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.ligson.fw.core.annotation.Autowire;
 import org.ligson.fw.core.vo.Bean;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,13 +15,22 @@ public class Context {
     private Map<Class, Bean> map = new HashMap<>();
 
     public Object initBean(Class clazz) {
-        Object object = null;
-        try {
-            object = clazz.newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (clazz.isInterface()) {
+            return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[]{clazz}, new InvocationHandler() {
+                @Override
+                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                    return method.invoke(proxy, args);
+                }
+            });
+        } else {
+            Object object = null;
+            try {
+                object = clazz.newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return object;
         }
-        return object;
     }
 
     public void put(Class clazz) {
@@ -29,8 +42,18 @@ public class Context {
     }
 
     public Bean get(Class clazz) {
-        Bean bean = map.get(clazz);
-        Field[] fields = clazz.getDeclaredFields();
+        Bean bean = null;
+        if (clazz.isInterface()) {
+            for (Class aClass : map.keySet()) {
+                if (ArrayUtils.contains(aClass.getInterfaces(), clazz)) {
+                    bean = map.get(aClass);
+                    break;
+                }
+            }
+        } else {
+            bean = map.get(clazz);
+        }
+        Field[] fields = bean.getaClass().getDeclaredFields();
         for (Field field : fields) {
             Autowire autowire = null;
             try {

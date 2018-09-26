@@ -1,5 +1,6 @@
 package core.test;
 
+import core.test.service.UserService;
 import org.ligson.fw.core.Application;
 import org.ligson.fw.core.annotation.FWApp;
 

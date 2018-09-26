@@ -1,4 +1,4 @@
-package core.test;
+package core.test.service;
 
 import org.ligson.fw.core.annotation.Service;
 
