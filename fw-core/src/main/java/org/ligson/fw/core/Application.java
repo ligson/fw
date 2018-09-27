@@ -1,6 +1,8 @@
 package org.ligson.fw.core;
 
+import org.ligson.fw.core.annotation.Component;
 import org.ligson.fw.core.annotation.FWApp;
+import org.ligson.fw.core.annotation.Service;
 
 import java.io.File;
 import java.net.URL;
@@ -65,9 +67,20 @@ public class Application {
         for (String aPackage : packages) {
             classList.addAll(findClassByPackage(aPackage));
         }
+        Class[] scanAnonClass = new Class[]{Component.class, Service.class};
         for (Class aClass : classList) {
-            context.put(aClass);
+            boolean contain = false;
+            for (Class anonClass : scanAnonClass) {
+                if (aClass.getDeclaredAnnotation(anonClass) != null) {
+                    contain = true;
+                    break;
+                }
+            }
+            if (contain) {
+                context.put(aClass);
+            }
         }
+        context.initAopFilters();
         System.out.println(classList.size());
     }
 }

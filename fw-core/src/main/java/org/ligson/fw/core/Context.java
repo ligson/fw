@@ -1,75 +1,84 @@
 package org.ligson.fw.core;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.ligson.fw.core.annotation.Autowire;
+import org.ligson.fw.core.aop.AopFilter;
+import org.ligson.fw.core.util.PropertyMapperUtil;
 import org.ligson.fw.core.vo.Bean;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Context {
-    private Map<Class, Bean> map = new HashMap<>();
+    private Map<String, Bean> beanMap = new HashMap<>();
+    private ProxyFactory proxyFactory = new ProxyFactory();
+    private Map<Class, List<Class>> interfaceImpl = new HashMap<>();
+    private List<AopFilter> aopFilters = new ArrayList<>();
 
-    public Object initBean(Class clazz) {
-        if (clazz.isInterface()) {
-            return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[]{clazz}, new InvocationHandler() {
-                @Override
-                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                    return method.invoke(proxy, args);
+    public void initAopFilters() {
+        for (String beanId : beanMap.keySet()) {
+            Bean bean = beanMap.get(beanId);
+            if (bean.getTargetClass().getSuperclass() == AopFilter.class) {
+                Object object = proxyFactory.proxy(bean.getTargetClass(), beanMap, interfaceImpl, aopFilters);
+                if (object == null) {
+                    throw new RuntimeException("create bean error");
                 }
-            });
-        } else {
-            Object object = null;
-            try {
-                object = clazz.newInstance();
-            } catch (Exception e) {
-                e.printStackTrace();
+                bean.setInstance(object);
+                aopFilters.add((AopFilter) object);
             }
-            return object;
         }
     }
 
     public void put(Class clazz) {
-        Bean bean = new Bean();
-        bean.setId(clazz + "-0");
-        bean.setaClass(clazz);
-        bean.setInstance(initBean(clazz));
-        map.put(clazz, bean);
+        if (clazz.isInterface()) {
+            if (!interfaceImpl.containsKey(clazz)) {
+                interfaceImpl.put(clazz, new ArrayList<>());
+            }
+        } else {
+            Class[] inters = clazz.getInterfaces();
+            for (Class inter : inters) {
+                if (!interfaceImpl.containsKey(inter)) {
+                    interfaceImpl.put(inter, new ArrayList<>());
+                }
+                List<Class> impls = interfaceImpl.get(inter);
+                if (!impls.contains(clazz)) {
+                    impls.add(clazz);
+                }
+            }
+            Bean bean = new Bean();
+            bean.setId(PropertyMapperUtil.convert2CamelCase(clazz.getSimpleName()));
+            bean.setTargetClass(clazz);
+            //bean.setInstance(initBean(clazz));
+            beanMap.put(bean.getId(), bean);
+        }
     }
+
 
     public Bean get(Class clazz) {
         Bean bean = null;
         if (clazz.isInterface()) {
-            for (Class aClass : map.keySet()) {
-                if (ArrayUtils.contains(aClass.getInterfaces(), clazz)) {
-                    bean = map.get(aClass);
+            List<Class> impls = interfaceImpl.get(clazz);
+            Class impl = impls.get(0);
+            for (String name : beanMap.keySet()) {
+                Class aClass = beanMap.get(name).getTargetClass();
+                if (aClass == impl) {
+                    bean = beanMap.get(name);
                     break;
                 }
             }
         } else {
-            bean = map.get(clazz);
+            String name = PropertyMapperUtil.convert2CamelCase(clazz.getSimpleName());
+            bean = beanMap.get(name);
         }
-        Field[] fields = bean.getaClass().getDeclaredFields();
-        for (Field field : fields) {
-            Autowire autowire = null;
-            try {
-                autowire = field.getDeclaredAnnotation(Autowire.class);
-            } catch (Exception e) {
-                continue;
+        if (bean == null) {
+            return null;
+        }
+        if (bean.getInstance() == null) {
+            Object object = proxyFactory.proxy(bean.getTargetClass(), beanMap, interfaceImpl, aopFilters);
+            if (object == null) {
+                return null;
             }
-            try {
-                field.setAccessible(true);
-                if (field.get(bean.getInstance()) == null) {
-                    Bean bean1 = get(field.getType());
-                    field.set(bean.getInstance(), bean1.getInstance());
-                }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
+            bean.setInstance(object);
         }
         return bean;
     }

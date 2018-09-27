@@ -2,17 +2,8 @@ package org.ligson.fw.core.vo;
 
 public class Bean {
     private String id;
-    private Class aClass;
+    private Class targetClass;
     private Object instance;
-    private boolean init;
-
-    public boolean isInit() {
-        return init;
-    }
-
-    public void setInit(boolean init) {
-        this.init = init;
-    }
 
     public String getId() {
         return id;
@@ -22,12 +13,12 @@ public class Bean {
         this.id = id;
     }
 
-    public Class getaClass() {
-        return aClass;
+    public Class getTargetClass() {
+        return targetClass;
     }
 
-    public void setaClass(Class aClass) {
-        this.aClass = aClass;
+    public void setTargetClass(Class targetClass) {
+        this.targetClass = targetClass;
     }
 
     public Object getInstance() {
