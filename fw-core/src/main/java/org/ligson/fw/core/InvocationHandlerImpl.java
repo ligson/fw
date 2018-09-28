@@ -30,22 +30,20 @@ public class InvocationHandlerImpl implements InvocationHandler, MethodIntercept
     private Object invoke(Object proxy, Method method, Object[] args, MethodInvoke methodInvoke) throws Throwable {
         Object result = null;
         String methodName = target.getClass().getName() + "." + method.getName();
-        System.out.println("invoke method:" + methodName);
-        System.out.println(target instanceof AopFilter);
         if (target instanceof AopFilter) {
             return method.invoke(target, args);
         }
         //before
-        System.out.println("之前1");
         for (AopFilter aopFilter : aopFilters) {
             if (methodName.matches(aopFilter.pattern())) {
                 aopFilter.before(target, method, args);
             }
         }
-        System.out.println("之前2");
         //around
+        boolean matchAround = false;
         for (AopFilter aopFilter : aopFilters) {
             if (methodName.matches(aopFilter.pattern())) {
+                matchAround = true;
                 if (result == null) {
                     result = aopFilter.around(proxy, method, args, methodInvoke);
                 } else {
@@ -53,17 +51,16 @@ public class InvocationHandlerImpl implements InvocationHandler, MethodIntercept
                 }
             }
         }
-        if (aopFilters.size() == 0) {
-            result = method.invoke(target, args);
+        if (!matchAround) {
+            //result = method.invoke(target, args);
+            result = methodInvoke.invoke(proxy, args);
         }
-        System.out.println("exc success");
         //after
         for (AopFilter aopFilter : aopFilters) {
             if (methodName.matches(aopFilter.pattern())) {
                 aopFilter.after(target, method, args);
             }
         }
-        System.out.println("exc after");
         return result;
     }
 

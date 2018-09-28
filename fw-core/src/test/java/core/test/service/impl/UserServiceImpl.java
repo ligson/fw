@@ -11,10 +11,7 @@ public class UserServiceImpl implements UserService {
     private CalcService calcService;
 
     public int add(int a, int b) {
-        System.out.println("调用add---------------"+calcService.getClass().getName());
         int add = calcService.add(a, b);
-//        int add = a + b;
-        System.out.println("calcService:" + add);
         return add;
     }
 }

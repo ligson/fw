@@ -17,11 +17,12 @@ class MyMethodInterceptor implements MethodInterceptor {
     @Override
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
         System.out.println("start");
-        if (name.equals(method.getName())) {
+        /*if (name.equals(method.getName())) {
             return proxy.invokeSuper(obj, args);
         } else {
             return null;
-        }
+        }*/
+        return proxy.invokeSuper(obj, args);
     }
 }
 
@@ -40,12 +41,13 @@ public class CglibTest {
 
 
         Enhancer enhancer2 = new Enhancer();
-        enhancer2.setSuperclass(field.getType());
+        enhancer2.setSuperclass(PrintService.class);
         MyMethodInterceptor my2 = new MyMethodInterceptor();
         my2.name = name;
         enhancer2.setCallback(my2);
-        enhancer2.setInterfaces(field.getType().getInterfaces());
+        enhancer2.setInterfaces(PrintService.class.getInterfaces());
         PrintService p = (PrintService) enhancer2.create();
+        p.print("-0-0-");
         System.out.println(p);
         field.set(calcService, p);
 

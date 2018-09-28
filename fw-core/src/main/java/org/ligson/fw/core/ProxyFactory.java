@@ -55,7 +55,6 @@ public class ProxyFactory {
     }
 
     private Object cglibProxy(Class targetClazz, Map<String, Bean> map, Map<Class, List<Class>> interfaceImpl, List<AopFilter> aopFilters) {
-        System.out.println("生成proxy:" + targetClazz.getName());
         if (targetClazz.getSuperclass() == AopFilter.class) {
             return jdkProxy(targetClazz, map, interfaceImpl, aopFilters);
         }
@@ -79,7 +78,6 @@ public class ProxyFactory {
             return null;
         }
         object = fillField(object, targetClazz, map, interfaceImpl, aopFilters);
-        System.out.println(targetClazz.getName());
         if (ArrayUtils.isNotEmpty(targetClazz.getInterfaces())) {
             InvocationHandlerImpl invocationHandler = new InvocationHandlerImpl(object, aopFilters);
             return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), object.getClass().getInterfaces(), invocationHandler);

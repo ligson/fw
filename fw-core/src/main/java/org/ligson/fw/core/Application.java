@@ -37,7 +37,6 @@ public class Application {
             Enumeration<URL> url = loader.getResources(pack);
             while (url.hasMoreElements()) {
                 URL url1 = url.nextElement();
-                System.out.println(url1);
                 File file = new File(url1.getFile());
                 List<File> files = listDir(file);
                 for (File file1 : files) {
@@ -82,6 +81,5 @@ public class Application {
             }
         }
         context.initAopFilters();
-        System.out.println(classList.size());
     }
 }

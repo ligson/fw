@@ -18,12 +18,10 @@ public class MethodInvoke {
 
     public Object invoke(Object object, Object[] args) throws Throwable {
         if (method != null) {
-            System.out.println("jdk 代理"+method.getName());
             return method.invoke(object, args);
 
         }
         if (methodProxy != null) {
-            System.out.println("cglib 代理"+methodProxy.getSignature().getDescriptor());
             return methodProxy.invokeSuper(object, args);
         }
         return null;

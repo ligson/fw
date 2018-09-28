@@ -17,12 +17,12 @@ public class MyAopFilter extends AopFilter {
 
     @Override
     public void before(Object object, Method method, Object[] args) {
-        System.out.println("调用方法:" + method.getName() + " before");
+        System.out.println("调用方法:" + method.getDeclaringClass().getName() + "." + method.getName() + " before");
     }
 
     @Override
     public void after(Object object, Method method, Object[] args) {
-        System.out.println("调用方法:" + method.getName() + " after");
+        System.out.println("调用方法:" + method.getDeclaringClass().getName() + "." + method.getName() + " after");
     }
 
     @Override
