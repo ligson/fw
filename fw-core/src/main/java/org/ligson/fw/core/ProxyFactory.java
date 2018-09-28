@@ -1,5 +1,6 @@
 package org.ligson.fw.core;
 
+import net.sf.cglib.proxy.Enhancer;
 import org.apache.commons.lang3.ArrayUtils;
 import org.ligson.fw.core.annotation.Autowire;
 import org.ligson.fw.core.aop.AopFilter;
@@ -12,15 +13,13 @@ import java.util.List;
 import java.util.Map;
 
 public class ProxyFactory {
+    private boolean enableCglibProxy;
 
-    public Object proxy(Class targetClazz, Map<String, Bean> map, Map<Class, List<Class>> interfaceImpl, List<AopFilter> aopFilters) {
-        Object object = null;
-        try {
-            object = targetClazz.newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+    public ProxyFactory(boolean enableCglibProxy) {
+        this.enableCglibProxy = enableCglibProxy;
+    }
+
+    private Object fillField(Object object, Class targetClazz, Map<String, Bean> map, Map<Class, List<Class>> interfaceImpl, List<AopFilter> aopFilters) {
         Field[] fields = targetClazz.getDeclaredFields();
         for (Field field : fields) {
             try {
@@ -52,11 +51,44 @@ public class ProxyFactory {
                 }
             }
         }
+        return object;
+    }
+
+    private Object cglibProxy(Class targetClazz, Map<String, Bean> map, Map<Class, List<Class>> interfaceImpl, List<AopFilter> aopFilters) {
+        System.out.println("生成proxy:" + targetClazz.getName());
+        if (targetClazz.getSuperclass() == AopFilter.class) {
+            return jdkProxy(targetClazz, map, interfaceImpl, aopFilters);
+        }
+        InvocationHandlerImpl invocationHandler = new InvocationHandlerImpl(aopFilters);
+        Enhancer enhancer = new Enhancer();
+        enhancer.setSuperclass(targetClazz);
+        enhancer.setCallback(invocationHandler);
+        enhancer.setInterfaces(targetClazz.getInterfaces());
+        Object object = enhancer.create();
+        invocationHandler.setTarget(object);
+        object = fillField(object, targetClazz, map, interfaceImpl, aopFilters);
+        return object;
+    }
+
+    private Object jdkProxy(Class targetClazz, Map<String, Bean> map, Map<Class, List<Class>> interfaceImpl, List<AopFilter> aopFilters) {
+        Object object = null;
+        try {
+            object = targetClazz.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        object = fillField(object, targetClazz, map, interfaceImpl, aopFilters);
+        System.out.println(targetClazz.getName());
         if (ArrayUtils.isNotEmpty(targetClazz.getInterfaces())) {
             InvocationHandlerImpl invocationHandler = new InvocationHandlerImpl(object, aopFilters);
             return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), object.getClass().getInterfaces(), invocationHandler);
         } else {
             return object;
         }
+    }
+
+    public Object proxy(Class targetClazz, Map<String, Bean> map, Map<Class, List<Class>> interfaceImpl, List<AopFilter> aopFilters) {
+        return enableCglibProxy ? cglibProxy(targetClazz, map, interfaceImpl, aopFilters) : jdkProxy(targetClazz, map, interfaceImpl, aopFilters);
     }
 }

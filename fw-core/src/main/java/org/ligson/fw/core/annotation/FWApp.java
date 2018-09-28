@@ -8,4 +8,6 @@ import java.lang.annotation.*;
 @Inherited
 public @interface FWApp {
     String[] basePackages() default {};
+
+    boolean enableCglibProxy() default false;
 }

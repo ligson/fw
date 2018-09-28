@@ -4,7 +4,7 @@ import core.test.service.UserService;
 import org.ligson.fw.core.Application;
 import org.ligson.fw.core.annotation.FWApp;
 
-@FWApp(basePackages = {"core.test"})
+@FWApp(basePackages = {"core.test"}, enableCglibProxy = true)
 public class App {
 
     public static void main(String[] args) throws Exception {

@@ -9,7 +9,16 @@ public class CalcService {
     private PrintService printService;
 
     public int add(int a, int b) {
+        System.out.println(printService+"=====");
         printService.print("计算结果:" + a + "+" + b + "=" + (a + b));
+        System.out.println("..........");
         return a + b;
+    }
+
+    @Override
+    public String toString() {
+        return "CalcService{" +
+                "printService=" + printService +
+                '}';
     }
 }

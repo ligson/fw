@@ -1,5 +1,6 @@
 package org.ligson.fw.core;
 
+import org.ligson.fw.core.annotation.FWApp;
 import org.ligson.fw.core.aop.AopFilter;
 import org.ligson.fw.core.util.PropertyMapperUtil;
 import org.ligson.fw.core.vo.Bean;
@@ -11,9 +12,15 @@ import java.util.Map;
 
 public class Context {
     private Map<String, Bean> beanMap = new HashMap<>();
-    private ProxyFactory proxyFactory = new ProxyFactory();
+    private ProxyFactory proxyFactory;
     private Map<Class, List<Class>> interfaceImpl = new HashMap<>();
     private List<AopFilter> aopFilters = new ArrayList<>();
+    private FWApp fwApp;
+
+    public Context(FWApp fwApp) {
+        this.fwApp = fwApp;
+        proxyFactory = new ProxyFactory(fwApp.enableCglibProxy());
+    }
 
     public void initAopFilters() {
         for (String beanId : beanMap.keySet()) {

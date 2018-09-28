@@ -11,5 +11,7 @@ dependencies {
 
     //spring依赖
     //compile "org.springframework:spring-context:${springVersion}"
+    // https://mvnrepository.com/artifact/cglib/cglib
+    compile group: 'cglib', name: 'cglib', version: '3.2.8'
 
 }

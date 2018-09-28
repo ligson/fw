@@ -11,7 +11,7 @@ import java.util.Enumeration;
 import java.util.List;
 
 public class Application {
-    private Context context = new Context();
+    private Context context;
 
     public <T> T getBeanByClass(Class<T> clazz) {
         return (T) context.get(clazz).getInstance();
@@ -58,6 +58,7 @@ public class Application {
         String methodName = mainInvoke.getMethodName();
         Class firstClazz = Class.forName(clazzName);
         FWApp fwApp = (FWApp) firstClazz.getDeclaredAnnotation(FWApp.class);
+        context = new Context(fwApp);
         String[] packages = fwApp.basePackages();
         if (packages.length == 0) {
             packages = new String[]{firstClazz.getPackage().getName()};

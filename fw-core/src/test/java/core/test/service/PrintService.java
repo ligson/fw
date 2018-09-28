@@ -7,4 +7,9 @@ public class PrintService {
     public void print(Object object) {
         System.out.println(object);
     }
+
+    @Override
+    public String toString() {
+        return "PrintService{}";
+    }
 }
