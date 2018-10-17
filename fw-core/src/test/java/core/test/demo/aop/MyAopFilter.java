@@ -1,6 +1,5 @@
-package core.test.aop;
+package core.test.demo.aop;
 
-import core.test.service.impl.UserServiceImpl;
 import org.ligson.fw.core.annotation.Component;
 import org.ligson.fw.core.aop.AopFilter;
 import org.ligson.fw.core.aop.MethodInvoke;

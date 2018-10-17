@@ -1,10 +1,12 @@
-package core.test;
+package core.test.demo;
 
-import core.test.service.UserService;
+import core.test.demo.service.UserService;
 import org.ligson.fw.core.Application;
+import org.ligson.fw.core.web.annotation.EnableWeb;
 import org.ligson.fw.core.annotation.FWApp;
 
 @FWApp(basePackages = {"core.test"}, enableCglibProxy = true)
+@EnableWeb(port = 8888)
 public class App {
 
     public static void main(String[] args) throws Exception {

@@ -1,10 +1,26 @@
 package org.ligson.fw.core;
 
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import io.netty.handler.codec.http.HttpResponseEncoder;
 import org.ligson.fw.core.annotation.Component;
+import org.ligson.fw.core.vo.Bean;
+import org.ligson.fw.core.web.HttpServer;
+import org.ligson.fw.core.web.annotation.Controller;
+import org.ligson.fw.core.web.annotation.EnableWeb;
 import org.ligson.fw.core.annotation.FWApp;
 import org.ligson.fw.core.annotation.Service;
+import org.ligson.fw.core.web.HttpServerInboundHandler;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -67,7 +83,7 @@ public class Application {
         for (String aPackage : packages) {
             classList.addAll(findClassByPackage(aPackage));
         }
-        Class[] scanAnonClass = new Class[]{Component.class, Service.class};
+        Class[] scanAnonClass = new Class[]{Component.class, Service.class, Controller.class};
         for (Class aClass : classList) {
             boolean contain = false;
             for (Class anonClass : scanAnonClass) {
@@ -81,5 +97,16 @@ public class Application {
             }
         }
         context.initAopFilters();
+        Annotation enableWeb = firstClazz.getDeclaredAnnotation(EnableWeb.class);
+        if (enableWeb != null) {
+            EnableWeb enableWeb1 = (EnableWeb) enableWeb;
+            List<Bean> controllers = context.getBeansByAnnotation(Controller.class);
+            processInitWeb(enableWeb1, controllers);
+        }
+    }
+
+    public void processInitWeb(EnableWeb enableWeb, List<Bean> controllers) throws Exception {
+        HttpServer httpServer = new HttpServer(enableWeb, controllers,context);
+        httpServer.start();
     }
 }

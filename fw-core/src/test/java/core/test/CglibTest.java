@@ -1,9 +1,7 @@
 package core.test;
 
-import core.test.service.CalcService;
-import core.test.service.PrintService;
-import core.test.service.UserService;
-import core.test.service.impl.UserServiceImpl;
+import core.test.demo.service.CalcService;
+import core.test.demo.service.PrintService;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;

@@ -5,6 +5,7 @@ import org.ligson.fw.core.aop.AopFilter;
 import org.ligson.fw.core.util.PropertyMapperUtil;
 import org.ligson.fw.core.vo.Bean;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,19 @@ public class Context {
     public Context(FWApp fwApp) {
         this.fwApp = fwApp;
         proxyFactory = new ProxyFactory(fwApp.enableCglibProxy());
+    }
+
+    public List<Bean> getBeansByAnnotation(Class annotationClazz) {
+        List<Bean> list = new ArrayList<>();
+        for (String beanName : beanMap.keySet()) {
+            Bean bean = beanMap.get(beanName);
+            Class targetClazz = bean.getTargetClass();
+            Annotation ann = targetClazz.getDeclaredAnnotation(annotationClazz);
+            if (ann != null) {
+                list.add(bean);
+            }
+        }
+        return list;
     }
 
     public void initAopFilters() {

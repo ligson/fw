@@ -1,4 +1,4 @@
-package core.test.service;
+package core.test.demo.service;
 
 import org.ligson.fw.core.annotation.Autowire;
 import org.ligson.fw.core.annotation.Service;
