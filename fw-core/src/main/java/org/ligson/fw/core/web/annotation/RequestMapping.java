@@ -15,4 +15,16 @@ public @interface RequestMapping {
 
     HttpMethod method() default HttpMethod.GET;
 
+    /***
+     * header Content-Type
+     * @return
+     */
+    String contentType() default "application/json";
+
+    /***
+     * header Accept
+     * @return
+     */
+    String acceptType() default "application/json";
+
 }

@@ -1,5 +1,6 @@
 package org.ligson.fw.core;
 
+import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import org.ligson.fw.core.aop.AopFilter;
@@ -10,6 +11,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class InvocationHandlerImpl implements InvocationHandler, MethodInterceptor {
     private Object target;
     private List<AopFilter> aopFilters = new ArrayList<>();

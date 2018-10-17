@@ -28,6 +28,7 @@ import java.util.List;
 
 public class Application {
     private Context context;
+    private HttpServer httpServer = null;
 
     public <T> T getBeanByClass(Class<T> clazz) {
         return (T) context.get(clazz).getInstance();
@@ -97,16 +98,26 @@ public class Application {
             }
         }
         context.initAopFilters();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (httpServer != null) {
+                    httpServer.stop();
+                }
+            }
+        }));
         Annotation enableWeb = firstClazz.getDeclaredAnnotation(EnableWeb.class);
         if (enableWeb != null) {
             EnableWeb enableWeb1 = (EnableWeb) enableWeb;
             List<Bean> controllers = context.getBeansByAnnotation(Controller.class);
             processInitWeb(enableWeb1, controllers);
         }
+
     }
 
     public void processInitWeb(EnableWeb enableWeb, List<Bean> controllers) throws Exception {
-        HttpServer httpServer = new HttpServer(enableWeb, controllers,context);
+        httpServer = new HttpServer(enableWeb, controllers, context);
         httpServer.start();
     }
 }

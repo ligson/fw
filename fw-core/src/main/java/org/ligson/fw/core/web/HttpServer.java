@@ -10,6 +10,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
+import lombok.extern.slf4j.Slf4j;
 import org.ligson.fw.core.Context;
 import org.ligson.fw.core.vo.Bean;
 import org.ligson.fw.core.web.annotation.EnableWeb;
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class HttpServer {
     private EnableWeb enableWeb;
     private List<Bean> controllers = new ArrayList<>();
@@ -73,13 +75,14 @@ public class HttpServer {
     }
 
     public void start() throws Exception {
-        try {
-            ChannelFuture f = serverBootstrap.bind(enableWeb.port()).sync();
-            f.channel().closeFuture().sync();
-        } finally {
-            workerGroup.shutdownGracefully();
-            bossGroup.shutdownGracefully();
-        }
+        ChannelFuture f = serverBootstrap.bind(enableWeb.port()).sync();
+        log.debug("start http server in port:{}", enableWeb.port());
+        f.channel().closeFuture().sync();
+    }
 
+    public void stop() {
+        workerGroup.shutdownGracefully();
+        bossGroup.shutdownGracefully();
+        log.debug("closed http server in port:{}", enableWeb.port());
     }
 }
