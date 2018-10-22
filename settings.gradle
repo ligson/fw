@@ -1,2 +1,4 @@
 rootProject.name = 'fw'
 include 'fw-core'
+include 'fwc-register'
+include 'fwc-common'
